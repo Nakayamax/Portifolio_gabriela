@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitetura de Implementação</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        .node {
+            fill: #fff;
+            stroke: #000;
+            stroke-width: 1.5px;
+        }
+        .link {
+            fill: none;
+            stroke: #666;
+            stroke-width: 2px;
+        }
+        .tool {
+            fill: #e0e0e0;
+        }
+        text {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <svg width="800" height="600"></svg>
+    <script>
+        const svg = d3.select("svg");
+        const width = +svg.attr("width");
+        const height = +svg.attr("height");
+
+        const nodes = [
+            { id: 'Start', label: 'Início' },
+            { id: 'DataInput', label: 'Entrada de Dados', tool: 'MySQL' },
+            { id: 'EnvSetup', label: 'Configuração do Ambiente', tool: 'Databricks' },
+            { id: 'ETLPipeline', label: 'Pipeline ETL', tool: 'PySpark' },
+            { id: 'Extraction', label: 'Extração', tool: 'PySpark' },
+            { id: 'Transformation', label: 'Transformação', tool: 'PySpark' },
+            { id: 'Loading', label: 'Carregamento', tool: 'MySQL' },
+            { id: 'Analysis', label: 'Análise e Visualização', tool: 'Databricks' },
+            { id: 'Automation', label: 'Automatização', tool: 'Databricks' },
+            { id: 'Monitoring', label: 'Monitoramento', tool: 'Databricks' },
+            { id: 'Results', label: 'Resultados Esperados' },
+            { id: 'End', label: 'Fim' }
+        ];
+
+        const links = [
+            { source: 'Start', target: 'DataInput' },
+            { source: 'DataInput', target: 'EnvSetup' },
+            { source: 'EnvSetup', target: 'ETLPipeline' },
+            { source: 'ETLPipeline', target: 'Extraction' },
+            { source: 'ETLPipeline', target: 'Transformation' },
+            { source: 'ETLPipeline', target: 'Loading' },
+            { source: 'Extraction', target: 'Analysis' },
+            { source: 'Transformation', target: 'Analysis' },
+            { source: 'Loading', target: 'Analysis' },
+            { source: 'Analysis', target: 'Automation' },
+            { source: 'Analysis', target: 'Monitoring' },
+            { source: 'Automation', target: 'Results' },
+            { source: 'Monitoring', target: 'Results' },
+            { source: 'Results', target: 'End' }
+        ];
+
+        const simulation = d3.forceSimulation(nodes)
+            .force('link', d3.forceLink(links).id(d => d.id))
+            .force('charge', d3.forceManyBody())
+            .force('center', d3.forceCenter(width / 2, height / 2));
+
+        const link = svg.append('g').selectAll('line')
+            .data(links)
+            .enter().append('line')
+            .attr('class', 'link');
+
+        const node = svg.append('g').selectAll('g')
+            .data(nodes)
+            .enter().append('g');
+
+        node.append('circle')
+            .attr('class', d => d.tool ? 'node tool' : 'node')
+            .attr('r', 30);
+
+        node.append('text')
+            .attr('x', 0)
+            .attr('y', 5)
+            .attr('text-anchor', 'middle')
+            .text(d => d.label);
+
+        simulation.on('tick', () => {
+            link
+                .attr('x1', d => d.source.x)
+                .attr('y1', d => d.source.y)
+                .attr('x2', d => d.target.x)
+                .attr('y2', d => d.target.y);
+
+            node
+                .attr('transform', d => `translate(${d.x},${d.y})`);
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
